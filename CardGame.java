@@ -85,13 +85,13 @@ public class CardGame {
          * @param t
          * @return
          */
-        public double checkHand(ArrayList<Integer> s) {
-                Integer n = (Integer) s.get(0);
+        public double checkHand(ArrayList<Integer> currentHand) {
+                Integer potentialMatch = (Integer) currentHand.get(0);
                 double sum = 0;
-                for (int Number : s) {
+                for (int Number : currentHand) {
                         sum = Number + sum;
                 }
-                if (sum / 4 == n) {
+                if (sum / 4 == potentialMatch) {
                         this.matchHand = true;
                 }
                 return sum / 4;
@@ -102,7 +102,7 @@ public class CardGame {
          */
         @Override
         public void run(){
-            
+
         }
     }
 
@@ -113,28 +113,30 @@ public class CardGame {
 
     //Starts game || Constructor
     public CardGame(){
-    Scanner sc = new Scanner(System.in); 
-    gameLock = new ReentrantLock();
+        Scanner sc = new Scanner(System.in); 
+        gameLock = new ReentrantLock();
 
-    System.out.println("Welcome to the CardGame! \n"
-                    + "You will need to enter how many players will play \n"
-                    + "You will then need to enter the location of the relevant pack");
-    System.out.println("Please enter the number of players: "); 
-    this.playerCount = sc.nextInt();
-    System.out.println("Please enter the location of the desired pack: ");
-    sc.nextLine();
-        //read files
+        System.out.println("Welcome to the CardGame! \n"
+                        + "You will need to enter how many players will play \n"
+                        + "You will then need to enter the location of the relevant pack");
+        System.out.println("Please enter the number of players: "); 
+        this.playerCount = sc.nextInt();
+        System.out.println("Please enter the location of the desired pack: ");
+        sc.nextLine();
+            //read files
 
 
-    //INCOMPLETE: CONSTRUCT THREAD CONSTRUCTOR
-    // creates players and add them to the ArrayList. Create Threads with a player assigned and add to the threadlist
-    for (int i=0; i<this.playerCount; i++){ 
-        Player newPlayer = new Player(i);
-        this.players.add(newPlayer);
-        this.threadList.add(new Thread(newPlayer));
-    }
-
-    this.runGame();
+        //INCOMPLETE: CONSTRUCT THREAD CONSTRUCTOR
+        // creates players and add them to the ArrayList. Create Threads with a player assigned and add to the threadlist
+        for (int i=0; i<this.playerCount; i++){ 
+            Player newPlayer = new Player(i);
+            CardDeck newDeck = new CardDeck(i);
+            this.players.add(newPlayer);
+            this.decks.add(newDeck);
+            this.threadList.add(new Thread(newPlayer));
+        }
+        
+        this.runGame();
 
     }
 
