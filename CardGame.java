@@ -7,26 +7,105 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
-
-
+import java.lang.Runnable;
+import java.lang.Thread;
 
 public class CardGame {
 
-    //Attributes
+    /**
+     * Initialise variables
+     */
     private Integer playerCount;
     private List<Player> players = new ArrayList<Player>();
     private List<Card> decks = new ArrayList<Card>();
-    private List<Thread> threadPool = new ArrayList<Thread>();
+    private List<Integer> pack = new ArrayList<Integer>();
+    private List<Thread> threadList = new ArrayList<Thread>();
+    private volatile Player winner;
+    public final ReentrantLock gameLock;
     
-    //MAKES THREADS
-    public synchronized void runGame(){
-        for (Thread thread : this.threadPool){
+
+    /**
+     * Starts all the threads and thus players
+     * */
+    public synchronized void runGame() {
+        for (Thread thread : this.threadList){
             thread.start();
         }
     }
+
+    /**
+     * Locks the game at whatever instance it is in, then interrupting the threads
+     * */
+    public void stop() {
+        this.gameLock.lock();
+        for (Thread thread : this.threadList){
+            thread.interrupt();
+        }
+        this.endGame();
+    }
+
+
+    /**
+     * end game
+     */
     public void endGame() {
         
     }
+
+    // public Card deckGenerator(){
+    //     return i;
+    // }
+
+
+
+    public class Player extends Thread {
+
+        // attributes
+        public Boolean matchHand = false;
+        public Integer playerNumber;
+        public ArrayList<Integer> hand = new ArrayList<Integer>();
+        
+        // constructor
+        public Player(Integer playerNumber) {
+                this.playerNumber = playerNumber;
+        }
+
+
+        // GETTERS
+        public Integer getPlayerNumber() { return playerNumber; }
+        public ArrayList<Integer> getHand() { return hand; }
+        public Boolean getMatchHand() { return matchHand; }
+
+        //SETTERS
+        public void setPlayerHand(Integer cardValue) {
+                this.hand.add(cardValue);
+        }
+
+        /**
+         * @param t
+         * @return
+         */
+        public double checkHand(ArrayList<Integer> s) {
+                Integer n = (Integer) s.get(0);
+                double sum = 0;
+                for (int Number : s) {
+                        sum = Number + sum;
+                }
+                if (sum / 4 == n) {
+                        this.matchHand = true;
+                }
+                return sum / 4;
+        }
+
+        /**
+         * run threads
+         */
+        @Override
+        public void run(){
+            
+        }
+    }
+
 
     //distribute cards
     //add players
@@ -34,30 +113,34 @@ public class CardGame {
 
     //Starts game || Constructor
     public CardGame(){
-    //Read pack.txt
     Scanner sc = new Scanner(System.in); 
+    gameLock = new ReentrantLock();
+
     System.out.println("Welcome to the CardGame! \n"
                     + "You will need to enter how many players will play \n"
                     + "You will then need to enter the location of the relevant pack");
-
     System.out.println("Please enter the number of players: "); 
     this.playerCount = sc.nextInt();
     System.out.println("Please enter the location of the desired pack: ");
     sc.nextLine();
+        //read files
 
 
-    for (int i=0; i<this.playerCount; i++){ // create players and add them to the ArrayList. Create Threads with a player assigned and add to the threadpool
-        this.players.add(new Player(i));
-        this.threadPool.add(new Thread(players.get(i)));
+    //INCOMPLETE: CONSTRUCT THREAD CONSTRUCTOR
+    // creates players and add them to the ArrayList. Create Threads with a player assigned and add to the threadlist
+    for (int i=0; i<this.playerCount; i++){ 
+        Player newPlayer = new Player(i);
+        this.players.add(newPlayer);
+        this.threadList.add(new Thread(newPlayer));
     }
+
     this.runGame();
 
     }
 
-
-
-
-
+    public static void main(String[] args) {
+        //run game here
+    }
 
     
 }
