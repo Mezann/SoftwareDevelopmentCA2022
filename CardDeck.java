@@ -18,7 +18,7 @@ public class CardDeck {
      * Initialise variables
      * */
     private Integer deckNumber;
-    public ArrayList<Integer> deckList = new ArrayList<Integer>();
+    public ArrayList<Integer> deck = new ArrayList<Integer>();
     public final ReentrantLock deckLock;
 
     /**
@@ -40,22 +40,27 @@ public class CardDeck {
      * Obtains the list of cards that are in the deck
      * @return deckNumber
      * */
-    public ArrayList<Integer> getDeckList() { return deckList; }
+    public ArrayList<Integer> getDeckHand() { return deck; }
 
     /**
      * Adds a card to the deck
      * @param cardValue
      * */
-    public void addCard(Integer cardValue) {
-            this.deckList.add(cardValue);
+    public void addDeckHand(Integer cardValue) {
+        this.deck.add(cardValue);
     }
+
+    public void setDeckHand(ArrayList<Integer> deck) {
+        this.deck = deck;
+    }
+    
     
     /**
      * Removes a card from the deck
      * @param 
      * */
     public void removeCard() {
-        this.deckList.remove(0);
+        this.deck.remove(0);
     }
 
 }

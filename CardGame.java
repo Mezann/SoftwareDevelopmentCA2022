@@ -133,7 +133,8 @@ public class CardGame {
         for (int j = 0; j < playerCardSize; j++) {
             Integer playerNumber = j%playerCount + 1;
             ArrayList<Integer> handTransfer = playersHands.get(playerNumber); 
-            Player 
+            Player specifiedPlayer = players.get(playerNumber);
+            specifiedPlayer.setPlayerHand(handTransfer);
         }
 
         //Deal for decks to hashmap
@@ -143,6 +144,13 @@ public class CardGame {
                 Integer deckNumber = j%playerCount + 1;
                 decksHands.get(deckNumber).add(dealtCard); 
             }
+        }
+
+        for (int j = 0; j < playerCardSize; j++) {
+            Integer deckNumber = j%playerCount + 1;
+            ArrayList<Integer> handTransfer = playersHands.get(deckNumber); 
+            CardDeck specifiedDeck = decks.get(deckNumber);
+            specifiedDeck.setDeckHand(handTransfer);
         }
     }
 
