@@ -64,14 +64,20 @@ public class CardGame {
      * @return intList
      * @throws IOException
      * */
-    public List<Integer> packGenerator(Scanner sc) throws IOException{
+    public List<Integer> packGenerator(Scanner sc) throws IOException {
         System.out.println("Please enter the location of the pack to load: ");
-        String fileName = sc.nextLine();        
-        BufferedReader packLoc = new BufferedReader(new FileReader(fileName));
+        String fileName = sc.next();
+        String replacedFile = fileName.replace("\n", "");
+        String trimmedFile = replacedFile.trim();
+
+        BufferedReader packLoc = new BufferedReader(new FileReader(trimmedFile));
+        System.out.println("test2");
+        
         // read entire line as string
         String line = packLoc.readLine();
         ArrayList<String> packInString = new ArrayList<>();
-        // checking for end of file
+        // checking for end of file4
+
         while (line != null) {
             packInString.add(line);
             line = packLoc.readLine();
@@ -84,21 +90,21 @@ public class CardGame {
                 .map(s -> Integer.parseInt(s))
                 .collect(Collectors.toList());
 
-        Boolean shuffleFlag = true;
-        while (shuffleFlag) {
-            System.out.println("Would you like to shuffle the cards? <y/n>");
-            String toShuffle = sc.nextLine();
-            if (toShuffle == "y") {
-                System.out.println("The deck will be shuffled.");
-                Collections.shuffle(intList);
-                shuffleFlag = false;
-            } if (toShuffle == "n") {
-                System.out.println("The deck will not be shuffled.");
-                shuffleFlag = false;
-            } else {
-                continue;
-            }
-        }
+        // Boolean shuffleFlag = true;
+        // while (shuffleFlag) {
+        //     System.out.println("Would you like to shuffle the cards? <y/n>");
+        //     String toShuffle = sc.nextLine();
+        //     if (toShuffle == "y") {
+        //         System.out.println("The deck will be shuffled.");
+        //         Collections.shuffle(intList);
+        //         shuffleFlag = false;
+        //     } if (toShuffle == "n") {
+        //         System.out.println("The deck will not be shuffled.");
+        //         shuffleFlag = false;
+        //     } else {
+        //         continue;
+        //     }
+        // }
         return intList;
     }
 
@@ -115,14 +121,18 @@ public class CardGame {
         for (int i = 0; i < packSize/2; i++) {
             playerCards.add(pack.get(i));
         }
-        for (int i= packSize/2; i < packSize; i= i++) {
+        for (int i= packSize/2; i < packSize; i++) {
             deckCards.add(pack.get(i));
         }
+        System.out.println(playerCards);
+        System.out.println(deckCards);
         int playerCardSize = playerCards.size();
         int deckCardSize = deckCards.size();
 
+        
         //hashmap , playerid, list of cards
         //Deal for players to hashmap
+
         for (int i = 0; i < playerCardSize; i++) {
             Integer dealtCard = playerCards.get(i);
             for (int j = 0; j < playerCardSize; j++) {
@@ -130,10 +140,11 @@ public class CardGame {
                 playersHands.get(playerNumber).add(dealtCard); 
             }
         }
-        for (int j = 0; j < playerCardSize; j++) {
+        //deal to players hands from hashmap
+        for (int j = 0; j < playerCount; j++) {
             Integer playerNumber = j%playerCount + 1;
             ArrayList<Integer> handTransfer = playersHands.get(playerNumber); 
-            Player specifiedPlayer = players.get(playerNumber);
+            Player specifiedPlayer = players.get(playerNumber-1);
             specifiedPlayer.setPlayerHand(handTransfer);
         }
 
@@ -149,9 +160,11 @@ public class CardGame {
         for (int j = 0; j < playerCardSize; j++) {
             Integer deckNumber = j%playerCount + 1;
             ArrayList<Integer> handTransfer = playersHands.get(deckNumber); 
-            CardDeck specifiedDeck = decks.get(deckNumber);
+            CardDeck specifiedDeck = decks.get(deckNumber-1);
             specifiedDeck.setDeckHand(handTransfer);
         }
+
+
     }
 
 
@@ -163,6 +176,7 @@ public class CardGame {
         public Boolean matchHand = false;
         public Integer playerNumber;
         public ArrayList<Integer> hand = new ArrayList<Integer>();
+        private Random random = new Random();
         
         // constructor
         public Player(Integer playerNumber) {
@@ -177,15 +191,29 @@ public class CardGame {
 
         //SETTERS
         public void addPlayerHand(Integer cardValue) {
-                this.hand.add(cardValue);
+            this.hand.add(cardValue);
         }
 
         public void setPlayerHand(ArrayList<Integer> playerHand) {
-                this.hand = playerHand;
+            this.hand = playerHand;
         }
 
-        public void pickACard() {
-
+        /**
+         * 
+         * @return pickedCard
+         */
+        public Integer pickACard() {
+            Boolean favouriteCard = true;
+            Integer pickedCard;
+            do  {
+                Integer randomIndex = random.nextInt(hand.size());
+                pickedCard = hand.get(randomIndex);
+                if (pickedCard != playerNumber) {
+                    favouriteCard = false;
+                    break;
+                }
+            } while (favouriteCard);
+            return pickedCard;
         }
 
         /**
@@ -214,11 +242,6 @@ public class CardGame {
             
         }
     }
-
-
-    //distribute cards
-    //add players
-    //make threads
     
 
     //Starts game || Constructor
@@ -231,14 +254,17 @@ public class CardGame {
         System.out.println("Please enter the number of players: "); 
         this.playerCount = sc.nextInt();
         //Checks if 8N amount of players
+        
         Boolean verifyCardAmount = true;
         while (verifyCardAmount) {
             this.pack = new ArrayList<>(packGenerator(sc));
-            if (pack.size() == playerCount) {
+            if (pack.size() == playerCount*8) {
+                verifyCardAmount = false;
                 break;
             } else {
                 System.out.println("Please ensure there are a valid number of cards in the pack.\n"
                                 + "There should be eight times as many cards as there are players.");
+                
             }  
         }
         
@@ -247,20 +273,20 @@ public class CardGame {
             Player newPlayer = new Player(i+1);
             CardDeck newDeck = new CardDeck(i+1);
             this.players.add(newPlayer);
-            playersHands.put(i+1, null);
-            decksHands.put(i+1,null);
+            playersHands.put(i+1, newPlayer.getHand());
+            decksHands.put(i+1, newPlayer.getHand());
+            System.out.println(players.get(0).getHand());
             this.decks.add(newDeck);
             this.threadList.add(new Thread(newPlayer));
         }
+        
         deal(playerCount);
-
-
-        this.runGame();
-
+        // this.runGame();
+        
     }
 
-    public static void main(String[] args) {
-        //run game here
+    public static void main(String[] args) throws IOException {
+        CardGame game = new CardGame();
     }
 
     
