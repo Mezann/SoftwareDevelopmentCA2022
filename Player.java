@@ -28,7 +28,7 @@ public class Player {
 
         /**
          * @param t
-         * @return 
+         * @return sum/4
          */
         public double checkHand(ArrayList<Integer> s) {
                 Integer n = (Integer) s.get(0);
