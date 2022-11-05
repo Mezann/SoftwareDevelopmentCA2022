@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
-import java.lang.Runnable;
 import java.lang.Thread;
 import java.util.HashMap;
 
@@ -61,15 +60,50 @@ public class CardGame {
     }
 
     /**
-     * @param
-     * Converts pack.txt into readable list
+     * Reads the pack file, converting it from a string into an integer array list
+     * @return intList
+     * @throws IOException
      * */
-    public List<Integer> packGenerator(Integer playerCount){
+    public List<Integer> packGenerator(Scanner sc) throws IOException{
+        System.out.println("Please enter the location of the pack to load: ");
+        String fileName = sc.nextLine();        
+        BufferedReader packLoc = new BufferedReader(new FileReader(fileName));
+        // read entire line as string
+        String line = packLoc.readLine();
+        ArrayList<String> packInString = new ArrayList<>();
+        // checking for end of file
+        while (line != null) {
+            packInString.add(line);
+            line = packLoc.readLine();
+        }
+        // closing bufferreader object
+        packLoc.close();
+        // storing the data in arraylist to array
+        String[] packInINT = packInString.toArray(new String[0]);
+        List<Integer> intList = packInString.stream()
+                .map(s -> Integer.parseInt(s))
+                .collect(Collectors.toList());
 
-        return pack;
+        Boolean shuffleFlag = true;
+        while (shuffleFlag) {
+            System.out.println("Would you like to shuffle the cards? <y/n>");
+            String toShuffle = sc.nextLine();
+            if (toShuffle == "y") {
+                System.out.println("The deck will be shuffled.");
+                Collections.shuffle(intList);
+                shuffleFlag = false;
+            } if (toShuffle == "n") {
+                System.out.println("The deck will not be shuffled.");
+                shuffleFlag = false;
+            } else {
+                continue;
+            }
+        }
+        return intList;
     }
 
     /**
+     * Deals cards from pack into the players hands and the decks
      * @param playerCount
      */
     public void deal(Integer playerCount) {
@@ -88,25 +122,30 @@ public class CardGame {
         int deckCardSize = deckCards.size();
 
         //hashmap , playerid, list of cards
-        //Deal for players
+        //Deal for players to hashmap
         for (int i = 0; i < playerCardSize; i++) {
             Integer dealtCard = playerCards.get(i);
-            //Player playerDealing = players.get(i%playerCount);
             for (int j = 0; j < playerCardSize; j++) {
                 Integer playerNumber = j%playerCount + 1;
                 playersHands.get(playerNumber).add(dealtCard); 
             }
         }
-        //Deal for decks
+        for (int j = 0; j < playerCardSize; j++) {
+            Integer playerNumber = j%playerCount + 1;
+            ArrayList<Integer> handTransfer = playersHands.get(playerNumber); 
+            Player 
+        }
+
+        //Deal for decks to hashmap
         for (int i = 0; i < deckCardSize; i++) {
             Integer dealtCard = deckCards.get(i);
-            //Player playerDealing = players.get(i%playerCount);
             for (int j = 0; j < deckCardSize; j++) {
                 Integer deckNumber = j%playerCount + 1;
                 decksHands.get(deckNumber).add(dealtCard); 
             }
         }
     }
+
 
     public class Player extends Thread {
 
@@ -129,8 +168,16 @@ public class CardGame {
         public Boolean getMatchHand() { return matchHand; }
 
         //SETTERS
-        public void setPlayerHand(Integer cardValue) {
+        public void addPlayerHand(Integer cardValue) {
                 this.hand.add(cardValue);
+        }
+
+        public void setPlayerHand(ArrayList<Integer> playerHand) {
+                this.hand = playerHand;
+        }
+
+        public void pickACard() {
+
         }
 
         /**
@@ -150,12 +197,13 @@ public class CardGame {
                 return sum / 4;
         }
 
+
         /**
          * run threads
          */
         @Override
         public void run(){
-
+            
         }
     }
 
@@ -169,41 +217,26 @@ public class CardGame {
     public CardGame() throws IOException{
         Scanner sc = new Scanner(System.in); 
         gameLock = new ReentrantLock();
-
         System.out.println("Welcome to the CardGame! \n"
                         + "You will need to enter how many players will play \n"
                         + "You will then need to enter the location of the relevant pack");
         System.out.println("Please enter the number of players: "); 
         this.playerCount = sc.nextInt();
-        System.out.println("Please enter the location of the pack to load: ");
-        String fileName = sc.nextLine();
-        BufferedReader packLoc = new BufferedReader(new FileReader(fileName));
-        // read entire line as string
-        String line = packLoc.readLine();
-        ArrayList<String> packInString = new ArrayList<>();
-        // checking for end of file
-        while (line != null) {
-            packInString.add(line);
-            line = packLoc.readLine();
+        //Checks if 8N amount of players
+        Boolean verifyCardAmount = true;
+        while (verifyCardAmount) {
+            this.pack = new ArrayList<>(packGenerator(sc));
+            if (pack.size() == playerCount) {
+                break;
+            } else {
+                System.out.println("Please ensure there are a valid number of cards in the pack.\n"
+                                + "There should be eight times as many cards as there are players.");
+            }  
         }
-
-        // closing bufferreader object
-        packLoc.close();
-        // storing the data in arraylist to array
-        String[] packInINT = packInString.toArray(new String[0]);
-        List<Integer> List = packInString.stream()
-                .map(s -> Integer.parseInt(s))
-                .collect(Collectors.toList());
-        Collections.shuffle(List);
-        this.pack = new ArrayList<>(List);
-        //CHECK FOR PLAYER COUNT -- 8N PLAYERS
         
-
-        //INCOMPLETE: CONSTRUCT THREAD CONSTRUCTOR
         // creates players and add them to the ArrayList. Create Threads with a player assigned and add to the threadlist
         for (int i=0; i<this.playerCount; i++){ 
             Player newPlayer = new Player(i+1);
-            //newPlayer.deal(playerCount);
             CardDeck newDeck = new CardDeck(i+1);
             this.players.add(newPlayer);
             playersHands.put(i+1, null);
@@ -211,7 +244,9 @@ public class CardGame {
             this.decks.add(newDeck);
             this.threadList.add(new Thread(newPlayer));
         }
-        
+        deal(playerCount);
+
+
         this.runGame();
 
     }
