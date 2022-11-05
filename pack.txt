@@ -1,0 +1,22 @@
+        BufferedReader packLoc = new BufferedReader(new FileReader("pack.txt"));
+        // read entire line as string
+        String line = packLoc.readLine();
+        ArrayList<String> packInString = new ArrayList<>();
+        // checking for end of file
+        while (line != null) {
+            packInString.add(line);
+            line = packLoc.readLine();
+        }
+
+        // closing bufferreader object
+        packLoc.close();
+        // storing the data in arraylist to array
+        String[] packInINT = packInString.toArray(new String[0]);
+        List<Integer> List = packInString.stream()
+                .map(s -> Integer.parseInt(s))
+                .collect(Collectors.toList());
+        ArrayList<Integer> packs = new ArrayList<>(List);
+        for (int i = 0; i < packs.size(); i++) {
+            System.out.println(packs.get(0) + packs.get(1));
+        }
+    }
