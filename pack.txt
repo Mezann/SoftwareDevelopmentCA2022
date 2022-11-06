@@ -1,22 +1,32 @@
-        BufferedReader packLoc = new BufferedReader(new FileReader("pack.txt"));
-        // read entire line as string
-        String line = packLoc.readLine();
-        ArrayList<String> packInString = new ArrayList<>();
-        // checking for end of file
-        while (line != null) {
-            packInString.add(line);
-            line = packLoc.readLine();
-        }
-
-        // closing bufferreader object
-        packLoc.close();
-        // storing the data in arraylist to array
-        String[] packInINT = packInString.toArray(new String[0]);
-        List<Integer> List = packInString.stream()
-                .map(s -> Integer.parseInt(s))
-                .collect(Collectors.toList());
-        ArrayList<Integer> packs = new ArrayList<>(List);
-        for (int i = 0; i < packs.size(); i++) {
-            System.out.println(packs.get(0) + packs.get(1));
-        }
-    }
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
