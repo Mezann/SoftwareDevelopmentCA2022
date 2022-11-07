@@ -71,7 +71,6 @@ public class CardGame {
         String trimmedFile = replacedFile.trim();
 
         BufferedReader packLoc = new BufferedReader(new FileReader(trimmedFile));
-        System.out.println("test2");
         
         // read entire line as string
         String line = packLoc.readLine();
@@ -90,6 +89,7 @@ public class CardGame {
                 .map(s -> Integer.parseInt(s))
                 .collect(Collectors.toList());
 
+        //shuffles pack file
         // Boolean shuffleFlag = true;
         // while (shuffleFlag) {
         //     System.out.println("Would you like to shuffle the cards? <y/n>");
@@ -131,38 +131,62 @@ public class CardGame {
 
         
         //hashmap , playerid, list of cards
-        //Deal for players to hashmap
 
-        for (int i = 0; i < playerCardSize; i++) {
-            Integer dealtCard = playerCards.get(i);
+
+        for (int i = 0; i < playerCount; i++) {
             for (int j = 0; j < playerCardSize; j++) {
-                Integer playerNumber = j%playerCount + 1;
-                playersHands.get(playerNumber).add(dealtCard); 
+                Integer dealtCard = playerCards.get(j);
+                int playerNumber = j % playerCount + 1;
+                if (playerNumber == i + 1) {
+                    playersHands.get(playerNumber).add(dealtCard);
+                }
             }
         }
-        //deal to players hands from hashmap
-        for (int j = 0; j < playerCount; j++) {
-            Integer playerNumber = j%playerCount + 1;
-            ArrayList<Integer> handTransfer = playersHands.get(playerNumber); 
-            Player specifiedPlayer = players.get(playerNumber-1);
-            specifiedPlayer.setPlayerHand(handTransfer);
-        }
+        System.out.println(playersHands.values());
+        System.out.println(decksHands.values());
 
-        //Deal for decks to hashmap
-        for (int i = 0; i < deckCardSize; i++) {
-            Integer dealtCard = deckCards.get(i);
+        for (int i = 0; i < playerCount; i++) {
             for (int j = 0; j < deckCardSize; j++) {
-                Integer deckNumber = j%playerCount + 1;
-                decksHands.get(deckNumber).add(dealtCard); 
+                Integer dealtCard = deckCards.get(j);
+                int deckNumber = j % playerCount + 1;
+                if (deckNumber == i +1) {
+                    decksHands.get(deckNumber).add(dealtCard);
+                }
             }
         }
+        System.out.println(playersHands.values());
+        System.out.println(decksHands.values());
+        // //Deal for players to hashmap
+        // for (int i = 0; i < playerCardSize; i++) {
+        //     Integer dealtCard = playerCards.get(i);
+        //     for (int j = 0; j < playerCardSize; j++) {
+        //         Integer playerNumber = j%playerCount + 1;
+        //         playersHands.get(playerNumber).add(dealtCard); 
+        //     }
+        // }
+        // //deal to players hands from hashmap
+        // for (int j = 0; j < playerCount; j++) {
+        //     Integer playerNumber = j%playerCount + 1;
+        //     ArrayList<Integer> handTransfer = playersHands.get(playerNumber); 
+        //     Player specifiedPlayer = players.get(playerNumber-1);
+        //     specifiedPlayer.setPlayerHand(handTransfer);
+        // }
 
-        for (int j = 0; j < playerCardSize; j++) {
-            Integer deckNumber = j%playerCount + 1;
-            ArrayList<Integer> handTransfer = playersHands.get(deckNumber); 
-            CardDeck specifiedDeck = decks.get(deckNumber-1);
-            specifiedDeck.setDeckHand(handTransfer);
-        }
+        // //Deal for decks to hashmap
+        // for (int i = 0; i < deckCardSize; i++) {
+        //     Integer dealtCard = deckCards.get(i);
+        //     for (int j = 0; j < deckCardSize; j++) {
+        //         Integer deckNumber = j%playerCount + 1;
+        //         decksHands.get(deckNumber).add(dealtCard); 
+        //     }
+        // }
+
+        // for (int j = 0; j < playerCardSize; j++) {
+        //     Integer deckNumber = j%playerCount + 1;
+        //     ArrayList<Integer> handTransfer = playersHands.get(deckNumber); 
+        //     CardDeck specifiedDeck = decks.get(deckNumber-1);
+        //     specifiedDeck.setDeckHand(handTransfer);
+        // }
 
 
     }
@@ -274,8 +298,7 @@ public class CardGame {
             CardDeck newDeck = new CardDeck(i+1);
             this.players.add(newPlayer);
             playersHands.put(i+1, newPlayer.getHand());
-            decksHands.put(i+1, newPlayer.getHand());
-            System.out.println(players.get(0).getHand());
+            decksHands.put(i+1, newDeck.getDeckHand());
             this.decks.add(newDeck);
             this.threadList.add(new Thread(newPlayer));
         }
