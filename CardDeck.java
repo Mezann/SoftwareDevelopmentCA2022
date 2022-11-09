@@ -19,6 +19,7 @@ public class CardDeck {
      * */
     private Integer deckNumber;
     public ArrayList<Integer> deck = new ArrayList<Integer>();
+    public ArrayList<Card> cardDeck = new ArrayList<Card>();
     public final ReentrantLock deckLock;
 
     /**
@@ -29,7 +30,6 @@ public class CardDeck {
         this.deckNumber = deckNumber;
         deckLock = new ReentrantLock();
     }
-
 
     /**
      * Obtains the number of the deck to identify it
@@ -50,10 +50,13 @@ public class CardDeck {
         this.deck.add(cardValue);
     }
 
+    /**
+     * Sets the whole deck
+     * @param deck
+     */
     public void setDeckHand(ArrayList<Integer> deck) {
         this.deck = deck;
     }
-    
     
     /**
      * Removes a card from the deck

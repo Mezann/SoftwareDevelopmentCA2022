@@ -124,15 +124,15 @@ public class CardGame {
         for (int i= packSize/2; i < packSize; i++) {
             deckCards.add(pack.get(i));
         }
-        System.out.println(playerCards);
-        System.out.println(deckCards);
+        System.out.println("playerCards " + playerCards);
+        System.out.println("deckCards " + deckCards);
         int playerCardSize = playerCards.size();
         int deckCardSize = deckCards.size();
 
         
         //hashmap , playerid, list of cards
 
-
+        //Deal from playerCards to hashmap
         for (int i = 0; i < playerCount; i++) {
             for (int j = 0; j < playerCardSize; j++) {
                 Integer dealtCard = playerCards.get(j);
@@ -142,9 +142,10 @@ public class CardGame {
                 }
             }
         }
-        System.out.println(playersHands.values());
-        System.out.println(decksHands.values());
+        System.out.println("playersHands " + playersHands.values());
+        System.out.println("decksHands " + decksHands.values());
 
+        //Deal from deckCards to Hashmap
         for (int i = 0; i < playerCount; i++) {
             for (int j = 0; j < deckCardSize; j++) {
                 Integer dealtCard = deckCards.get(j);
@@ -154,39 +155,26 @@ public class CardGame {
                 }
             }
         }
-        System.out.println(playersHands.values());
-        System.out.println(decksHands.values());
-        // //Deal for players to hashmap
-        // for (int i = 0; i < playerCardSize; i++) {
-        //     Integer dealtCard = playerCards.get(i);
-        //     for (int j = 0; j < playerCardSize; j++) {
-        //         Integer playerNumber = j%playerCount + 1;
-        //         playersHands.get(playerNumber).add(dealtCard); 
-        //     }
-        // }
-        // //deal to players hands from hashmap
-        // for (int j = 0; j < playerCount; j++) {
-        //     Integer playerNumber = j%playerCount + 1;
-        //     ArrayList<Integer> handTransfer = playersHands.get(playerNumber); 
-        //     Player specifiedPlayer = players.get(playerNumber-1);
-        //     specifiedPlayer.setPlayerHand(handTransfer);
-        // }
+        System.out.println("playersHands " + playersHands.values());
+        System.out.println("playersHands " + decksHands.values());
+        
+        //deal to players hands from hashmap
+        for (int j = 0; j < playerCount; j++) {
+            Integer playerNumber = j%playerCount + 1;
+            ArrayList<Integer> handTransfer = playersHands.get(playerNumber);
+            Player specifiedPlayer = players.get(playerNumber-1);
+            specifiedPlayer.setPlayerHand(handTransfer);
+            System.out.println("player" + playerNumber + " playerHand:" + specifiedPlayer.getPlayerHand());
+        }
 
-        // //Deal for decks to hashmap
-        // for (int i = 0; i < deckCardSize; i++) {
-        //     Integer dealtCard = deckCards.get(i);
-        //     for (int j = 0; j < deckCardSize; j++) {
-        //         Integer deckNumber = j%playerCount + 1;
-        //         decksHands.get(deckNumber).add(dealtCard); 
-        //     }
-        // }
-
-        // for (int j = 0; j < playerCardSize; j++) {
-        //     Integer deckNumber = j%playerCount + 1;
-        //     ArrayList<Integer> handTransfer = playersHands.get(deckNumber); 
-        //     CardDeck specifiedDeck = decks.get(deckNumber-1);
-        //     specifiedDeck.setDeckHand(handTransfer);
-        // }
+        //deal to decks from hashmap
+        for (int j = 0; j < playerCount; j++) {
+            Integer deckNumber = j%playerCount + 1;
+            ArrayList<Integer> handTransfer = decksHands.get(deckNumber);
+            CardDeck specifiedDeck = decks.get(deckNumber-1);
+            specifiedDeck.setDeckHand(handTransfer);
+            System.out.println("deck" + deckNumber + " deckHand:" + specifiedDeck.getDeckHand());
+        }
 
 
     }
@@ -199,6 +187,7 @@ public class CardGame {
          * */
         public Boolean matchHand = false;
         public Integer playerNumber;
+        public ArrayList<Card> cards = new ArrayList<Card>();
         public ArrayList<Integer> hand = new ArrayList<Integer>();
         private Random random = new Random();
         
@@ -210,7 +199,8 @@ public class CardGame {
 
         // GETTERS
         public Integer getPlayerNumber() { return playerNumber; }
-        public ArrayList<Integer> getHand() { return hand; }
+        public ArrayList<Integer> getPlayerHand() { return hand; }
+        public ArrayList<Card> getPlayerCards() { return cards; }
         public Boolean getMatchHand() { return matchHand; }
 
         //SETTERS
@@ -220,6 +210,14 @@ public class CardGame {
 
         public void setPlayerHand(ArrayList<Integer> playerHand) {
             this.hand = playerHand;
+        }
+
+        public void addCard(Card card) {
+            this.cards.add(card);
+        }
+
+        public void setAllCards(ArrayList<Card> cards) {
+            this.cards = cards;
         }
 
         /**
@@ -268,28 +266,45 @@ public class CardGame {
     }
     
 
-    //Starts game || Constructor
+    /**
+     * Constructor for the main class, CardGame. Starts the game; sets player, verifies pack file, deals cards, and starts threads
+     * @throws IOException
+     */
     public CardGame() throws IOException{
         Scanner sc = new Scanner(System.in); 
         gameLock = new ReentrantLock();
         System.out.println("Welcome to the CardGame! \n"
                         + "You will need to enter how many players will play \n"
                         + "You will then need to enter the location of the relevant pack");
-        System.out.println("Please enter the number of players: "); 
-        this.playerCount = sc.nextInt();
-        //Checks if 8N amount of players
         
+
+        //Checks if 8N amount of players
         Boolean verifyCardAmount = true;
         while (verifyCardAmount) {
+            System.out.println("Please enter the number of players: "); 
+            this.playerCount = sc.nextInt();
+
             this.pack = new ArrayList<>(packGenerator(sc));
+            System.out.println("Pack: " + pack);
+            System.out.println("Pack size: " + pack.size());
+            
+            for (int i = 0; i < pack.size(); i++) {
+                Integer cardValue = pack.get(i);
+                System.out.println("cardValue: " + cardValue);
+                if (cardValue < 0) {
+                    System.out.println("There can not be negative numbers in the pack."); 
+                    throw new Error("Card values must be positive.");
+                }
+            }
+            
             if (pack.size() == playerCount*8) {
                 verifyCardAmount = false;
                 break;
             } else {
-                System.out.println("Please ensure there are a valid number of cards in the pack.\n"
-                                + "There should be eight times as many cards as there are players.");
-                
-            }  
+                System.out.println("Please ensure there are a valid number of cards in the pack or change the player count. \n"
+                                + "There should be eight times as many cards as there are players. \n");
+            }
+            
         }
         
         // creates players and add them to the ArrayList. Create Threads with a player assigned and add to the threadlist
@@ -297,7 +312,7 @@ public class CardGame {
             Player newPlayer = new Player(i+1);
             CardDeck newDeck = new CardDeck(i+1);
             this.players.add(newPlayer);
-            playersHands.put(i+1, newPlayer.getHand());
+            playersHands.put(i+1, newPlayer.getPlayerHand());
             decksHands.put(i+1, newDeck.getDeckHand());
             this.decks.add(newDeck);
             this.threadList.add(new Thread(newPlayer));
