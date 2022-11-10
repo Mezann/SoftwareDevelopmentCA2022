@@ -27,7 +27,8 @@ public class CardGame {
     private List<Thread> threadList = new ArrayList<Thread>();
     public HashMap<Integer, ArrayList<Integer>> playersHands = new HashMap<Integer, ArrayList<Integer>>();
     public HashMap<Integer, ArrayList<Integer>> decksHands = new HashMap<Integer, ArrayList<Integer>>();
-    private volatile Player winner;
+    private CardGame currentGame = this;
+    private volatile static Player winner;
     public final ReentrantLock gameLock;
     
 
@@ -56,7 +57,20 @@ public class CardGame {
      * end game
      * */
     public void endGame() {
+        ArrayList<Integer> winnersHand = new ArrayList<Integer>();
+        winnersHand = winner.getPlayerHand();
+        System.out.println("Player" + winner.getPlayerNumber() + " wins");
         
+        for (Player player : this.players) {
+            player.closeFile();
+        }
+        for (CardDeck cardDeck : this.decks) {
+            cardDeck.closeFile();
+        }
+        System.out.println("All files are closed.\nThank you for playing.");
+        System.out.println("The program will now end.");
+        this.gameLock.unlock();
+        System.exit(0);
     }
 
     /**
@@ -142,8 +156,6 @@ public class CardGame {
                 }
             }
         }
-        System.out.println("playersHands " + playersHands.values());
-        System.out.println("decksHands " + decksHands.values());
 
         //Deal from deckCards to Hashmap
         for (int i = 0; i < playerCount; i++) {
@@ -156,7 +168,7 @@ public class CardGame {
             }
         }
         System.out.println("playersHands " + playersHands.values());
-        System.out.println("playersHands " + decksHands.values());
+        System.out.println("decksHands " + decksHands.values());
         
         //deal to players hands from hashmap
         for (int j = 0; j < playerCount; j++) {
@@ -174,6 +186,7 @@ public class CardGame {
             CardDeck specifiedDeck = decks.get(deckNumber-1);
             specifiedDeck.setDeckHand(handTransfer);
             System.out.println("deck" + deckNumber + " deckHand:" + specifiedDeck.getDeckHand());
+
         }
 
 
@@ -190,10 +203,34 @@ public class CardGame {
         public ArrayList<Card> cards = new ArrayList<Card>();
         public ArrayList<Integer> hand = new ArrayList<Integer>();
         private Random random = new Random();
+        private FileWriter fileWriter;
+        private CardGame currentGame;
+        
         
         // constructor
-        public Player(Integer playerNumber) {
+        /**
+         * Constructor for a player. Initialises playerNumber and creates player output files.
+         * @param playerNumber
+         */
+        public Player(Integer playerNumber, CardGame currentGame) {
                 this.playerNumber = playerNumber;
+                this.currentGame = currentGame;
+                //Creates player files
+                String filename = "player" + playerNumber.toString() + "_output.txt";
+                File file = new File(filename);
+
+                try {
+                    //Checks if file exists
+                    if (file.exists() && !file.isDirectory()) {
+                        this.fileWriter = new FileWriter(filename); 
+                    } else {
+                        file.createNewFile();
+                        this.fileWriter = new FileWriter(filename);
+                    }
+                } catch (IOException e) {
+                    System.out.println("File creation error");
+                    e.printStackTrace();
+                }
         }
 
 
@@ -220,48 +257,98 @@ public class CardGame {
             this.cards = cards;
         }
 
-        /**
-         * 
-         * @return pickedCard
-         */
-        public Integer pickACard() {
-            Boolean favouriteCard = true;
-            Integer pickedCard;
-            do  {
-                Integer randomIndex = random.nextInt(hand.size());
-                pickedCard = hand.get(randomIndex);
-                if (pickedCard != playerNumber) {
-                    favouriteCard = false;
-                    break;
-                }
-            } while (favouriteCard);
-            return pickedCard;
-        }
 
         /**
          * Checks if the player has a matching hand
-         * @param ArrayList<Integer> currentHand
-         * @return sum/4
+         * @return matchHand
          */
-        public double checkHand(ArrayList<Integer> currentHand) {
-                Integer potentialMatch = (Integer) currentHand.get(0);
-                double sum = 0;
-                for (int Number : currentHand) {
-                        sum = Number + sum;
+        public Boolean checkHand() {
+            Integer potentialMatch = hand.get(0);
+            double sum = 0;
+            for (Integer number : hand){
+                sum = number + sum;
+            }
+            if (sum / 4 == potentialMatch) {
+                try {
+                    System.out.println("Player" + playerNumber + "wins!");
+                    this.fileWriter.write("Player" + playerNumber + "wins!");
+                } catch (Exception e) {
+                    System.out.println("Checkhand error");
+                    e.printStackTrace();
                 }
-                if (sum / 4 == potentialMatch) {
-                        this.matchHand = true;
-                }
-                return sum / 4;
+                this.matchHand = true;
+                return matchHand;
+            } else {
+                return matchHand;
+            }
         }
 
+        public void drawCard() {
+            Integer desiredDeck = playerNumber - 1;
+            Integer drawnCard = decks.get(desiredDeck).removeCard();
+            this.addPlayerHand(drawnCard);
+            System.out.println("hand " + hand);
+            System.out.println("deck" + decks.get(desiredDeck).getDeckNumber() + "hand " + decks.get(desiredDeck).getDeckHand());
+        }
+
+        /**
+         * Selects a card that is not the players favourite card
+         * Sends it to the required deck
+         */
+        public void discardCard() {
+            
+            Boolean favouriteCard = true;
+            Integer discardedCard;
+            do  {
+                int randint = random.nextInt(hand.size());
+                discardedCard = hand.get(randint);
+                if (discardedCard != playerNumber) {
+                    hand.remove(randint);
+                    break;
+                }
+            } while (favouriteCard);
+
+            Integer destinationDeck = playerNumber;
+            Integer oneLessPlayers = playerCount - 1;
+            if (playerCount == playerNumber) {
+                destinationDeck = playerCount - oneLessPlayers;
+            }
+            decks.get(destinationDeck).addDeckHand(discardedCard);
+            try {
+                this.fileWriter.write("Player" + playerNumber + " discards a " + discardedCard + " to deck" + destinationDeck + "\n");
+                System.out.println("Player" + playerNumber + " discards a " + discardedCard + " to deck" + destinationDeck);
+                this.fileWriter.flush();
+            } catch (IOException e) {
+                System.out.println("Discard card error");
+                e.printStackTrace();
+            }
+        }
+
+        public void closeFile() {
+            try{
+                this.fileWriter.close();
+            }catch (IOException e){
+                System.out.println("An IOException occurred.");
+                e.printStackTrace();
+            }
+        }
 
         /**
          * run threads
          */
         @Override
         public void run(){
-            
+            Boolean winningHand = false;
+            winningHand = checkHand(); 
+            while (!Thread.currentThread().isInterrupted() && !winningHand) {
+                drawCard();
+                discardCard();
+                winningHand = checkHand();
+            }
+            if (winningHand) {
+                currentGame.winner = this;
+                currentGame.stop();
+            }
         }
     }
     
@@ -288,12 +375,11 @@ public class CardGame {
             System.out.println("Pack: " + pack);
             System.out.println("Pack size: " + pack.size());
             
+
             for (int i = 0; i < pack.size(); i++) {
                 Integer cardValue = pack.get(i);
-                System.out.println("cardValue: " + cardValue);
                 if (cardValue < 0) {
                     System.out.println("There can not be negative numbers in the pack."); 
-                    throw new Error("Card values must be positive.");
                 }
             }
             
@@ -309,8 +395,8 @@ public class CardGame {
         
         // creates players and add them to the ArrayList. Create Threads with a player assigned and add to the threadlist
         for (int i=0; i<this.playerCount; i++){ 
-            Player newPlayer = new Player(i+1);
-            CardDeck newDeck = new CardDeck(i+1);
+            Player newPlayer = new Player(i+1, this);
+            CardDeck newDeck = new CardDeck(i+1, this);
             this.players.add(newPlayer);
             playersHands.put(i+1, newPlayer.getPlayerHand());
             decksHands.put(i+1, newDeck.getDeckHand());
@@ -318,8 +404,11 @@ public class CardGame {
             this.threadList.add(new Thread(newPlayer));
         }
         
+        //CREATE PLAYER AND DECK FILES
+
         deal(playerCount);
-        // this.runGame();
+        
+        this.runGame();
         
     }
 
