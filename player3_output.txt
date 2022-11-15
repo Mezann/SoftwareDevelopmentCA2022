@@ -1,0 +1,37 @@
+Player 3 initial hand 3 7 11 15
+Player 3 draws a 19 from deck 3
+Player 3 discards a 15 to deck 4
+Player 3 current hand is 3 7 11 19
+Player 3 draws a 23 from deck 3
+Player 3 discards a 11 to deck 4
+Player 3 current hand is 3 7 19 23
+Player 3 draws a 27 from deck 3
+Player 3 discards a 27 to deck 4
+Player 3 current hand is 3 7 19 23
+Player 3 draws a 1 from deck 3
+Player 3 discards a 19 to deck 4
+Player 3 current hand is 3 7 23 1
+Player 3 draws a 14 from deck 3
+Player 3 discards a 23 to deck 4
+Player 3 current hand is 3 7 1 14
+Player 3 draws a 18 from deck 3
+Player 3 discards a 18 to deck 4
+Player 3 current hand is 3 7 1 14
+Player 3 draws a 26 from deck 3
+Player 3 discards a 1 to deck 4
+Player 3 current hand is 3 7 14 26
+Player 3 draws a 22 from deck 3
+Player 3 discards a 14 to deck 4
+Player 3 current hand is 3 7 26 22
+Player 3 draws a 6 from deck 3
+Player 3 discards a 22 to deck 4
+Player 3 current hand is 3 7 26 6
+Player 3 draws a 1 from deck 3
+Player 3 discards a 6 to deck 4
+Player 3 current hand is 3 7 26 1
+Player 3 draws a 21 from deck 3
+Player 3 discards a 26 to deck 4
+Player 3 current hand is 3 7 1 21
+Player 3 draws a 5 from deck 3
+Player 3 discards a 21 to deck 4
+Player 3 current hand is 3 7 1 5

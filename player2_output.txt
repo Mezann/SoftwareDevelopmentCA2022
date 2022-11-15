@@ -1,0 +1,25 @@
+Player 2 initial hand 2 6 10 14
+Player 2 draws a 18 from deck 2
+Player 2 discards a 14 to deck 3
+Player 2 current hand is 2 6 10 18
+Player 2 draws a 22 from deck 2
+Player 2 discards a 18 to deck 3
+Player 2 current hand is 2 6 10 22
+Player 2 draws a 26 from deck 2
+Player 2 discards a 26 to deck 3
+Player 2 current hand is 2 6 10 22
+Player 2 draws a 1 from deck 2
+Player 2 discards a 22 to deck 3
+Player 2 current hand is 2 6 10 1
+Player 2 draws a 9 from deck 2
+Player 2 discards a 6 to deck 3
+Player 2 current hand is 2 10 1 9
+Player 2 draws a 21 from deck 2
+Player 2 discards a 1 to deck 3
+Player 2 current hand is 2 10 9 21
+Player 2 draws a 5 from deck 2
+Player 2 discards a 21 to deck 3
+Player 2 current hand is 2 10 9 5
+Player 2 draws a 25 from deck 2
+Player 2 discards a 5 to deck 3
+Player 2 current hand is 2 10 9 25
