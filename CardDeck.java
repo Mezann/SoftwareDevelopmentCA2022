@@ -94,10 +94,11 @@ public class CardDeck {
      * @param 
      * */
     public synchronized Integer removeCard() {
-        Integer cardRemoved = this.cardDeck.get(0).getCardValue();
+        //Integer cardRemoved = this.cardDeck.get(0).getCardValue();
+        Integer intPicked = this.deck.get(0);
         this.deck.remove(0);
-        this.cardDeck.remove(0);
-        return cardRemoved;
+        //this.cardDeck.remove(0);
+        return intPicked;
     }
 
     /**

@@ -34,7 +34,7 @@ public class CardGame {
     private HashMap<Integer, ArrayList<Card>> decksCardHands = new HashMap<Integer, ArrayList<Card>>();
     private HashMap<Integer, ArrayList<Integer>> decksHands = new HashMap<Integer, ArrayList<Integer>>();
     private volatile Player winner;
-    public final ReentrantLock gameLock;
+    private final ReentrantLock gameLock;
     
 
     /**
@@ -71,7 +71,7 @@ public class CardGame {
             cardDeck.closeFile();
         }
 
-        System.out.println("Player" + winner.getPlayerNumber() + " wins" + "\n"
+        System.out.println("Player " + winner.getPlayerNumber() + " wins" + "\n"
                         + "All files are closed.\nThank you for playing." + "\n"
                         + "The program will now end.");
                         
@@ -87,9 +87,10 @@ public class CardGame {
      * @throws IOException
      * */
     public List<Integer> packGenerator(Scanner sc) throws IOException {
+        //Obtains file, removes any whitespaces
         System.out.println("Please enter the location of the pack to load: ");
         String fileName = sc.next();
-        String replacedFile = fileName.replace("\n", "");
+        String replacedFile = fileName.replace("\n", "").replace(" ", "");
         String trimmedFile = replacedFile.trim();
 
         BufferedReader packLoc = new BufferedReader(new FileReader(trimmedFile));
@@ -208,21 +209,21 @@ public class CardGame {
     }
 
 
-    public class Player extends Thread {
+    class Player extends Thread {
 
         /**
          * Initialise variables
          * */
-        public Boolean matchHand = false;
-        public Integer playerNumber;
-        public ArrayList<Card> cardHand = new ArrayList<Card>();
-        public ArrayList<Integer> hand = new ArrayList<Integer>();
+        private Boolean matchHand = false;
+        private Integer playerNumber;
+        private ArrayList<Card> cardHand = new ArrayList<Card>();
+        private ArrayList<Integer> hand = new ArrayList<Integer>();
         private Random random = new Random();
+        private CardDeck drawDeck;
+        private CardDeck discardDeck;
         private FileWriter fileWriter;
         private CardGame currentGame;
         
-        
-        // constructor
         /**
          * Constructor for a player. Initialises playerNumber and creates player output files.
          * @param playerNumber
@@ -230,10 +231,11 @@ public class CardGame {
         public Player(Integer playerNumber, CardGame currentGame) {
                 this.playerNumber = playerNumber;
                 this.currentGame = currentGame;
+                this.drawDeck = decks.get(playerNumber-1);
+
                 //Creates player files
                 String filename = "player" + playerNumber.toString() + "_output.txt";
                 File file = new File(filename);
-
                 try {
                     //Checks if file exists
                     if (file.exists() && !file.isDirectory()) {
@@ -335,6 +337,26 @@ public class CardGame {
         }
 
         /**
+         * Draws and discards cards
+         */
+        public synchronized void gamePlayer() {
+            this.addPlayerHand(drawDeck.removeCard());
+            this.addPlayerCardHand(new Card(drawDeck.removeCard()));
+            //Writes to the output player files what card was drawn and from which
+            try {
+                int finalCard = (hand.size()-1);
+                this.fileWriter.write("Player " + playerNumber + " draws a " + hand.get(finalCard) + " from deck " + (playerNumber-1) + "\n");
+                this.fileWriter.flush();
+            } catch (Exception e) {
+                // TODO: handle exception
+                System.out.println("Draw filewriter gamePlayer error, player " + playerNumber);
+                e.printStackTrace();
+            }
+
+            // decks.get((playerNumber+1)%playerCount).addDeckHand();
+        }
+
+        /**
          * Draws a card from the relevant card deck, then adds it to the player hand
          */
         public synchronized void drawCard() {
@@ -343,10 +365,15 @@ public class CardGame {
             Card newCard = new Card(drawnCard);
             this.addPlayerCardHand(newCard);
             this.addPlayerHand(drawnCard);
-            System.out.println("player " + playerNumber +" draws a " + drawnCard +" from deck " + (desiredDeck+1) + "\n");
-
+            System.out.println("player " + playerNumber +" draws a " + drawnCard +" from deck " + (desiredDeck+1) + "\n"
+                            + "Player " + playerNumber + " current hand is " + getPlayerHand().toString().replace("[", "").replace("]", "").replace(",", "") + "\n"
+                            + "deck " + (desiredDeck+1) + ": " + decks.get(desiredDeck).getDeckHand() + "drawn");
             try {
-                this.fileWriter.write("Player " + playerNumber +" draws a " + drawnCard +" from deck " + (desiredDeck+1) + "\n");
+                int finalCard = (hand.size()-1);
+                // ArrayList<Integer> cardsToInt = new ArrayList<Integer>();
+                // for (Card card: cardHand)
+                this.fileWriter.write("Player " + playerNumber + " draws a " + hand.get(finalCard) + " from deck " + (playerNumber-1) + "\n");
+                this.fileWriter.flush();
             } catch (IOException e) {
                 System.out.println("Draw card filewriter error, player " + playerNumber);
                 e.printStackTrace();
@@ -367,17 +394,17 @@ public class CardGame {
 
             boolean favouriteCard=true;
             while (favouriteCard) {
-                int rand = random.nextInt(cardHand.size());
+                int rand = random.nextInt(hand.size());
                 int theCard = hand.get(rand);
-
-                if (playerNumber!= theCard){
+                if (playerNumber != theCard){
                     hand.remove(rand);
                     decks.get(deckNumber).addDeckHand(theCard);
                     try {
                         this.fileWriter.write("Player " + playerNumber + " discards a " + theCard + " to deck " + (deckNumber+1) + "\n"
                             + "Player " + playerNumber + " current hand is " + getPlayerHand().toString().replace("[", "").replace("]", "").replace(",", "") + "\n");
-                        System.out.println("player "+playerNumber+" discards a "+theCard+" to deck "+ (deckNumber+1) + "\n"
-                            + "deck "+(deckNumber+1)+decks.get(deckNumber).getDeckHand() + " discarded" + "\n"
+                        
+                        System.out.println("Player " + playerNumber + " discards a " + theCard + " to deck " + (deckNumber+1) + "\n"
+                            + "deck " + (deckNumber+1) + ": " + decks.get(deckNumber).getDeckHand() + " discarded" + "\n"
                             + "player "+playerNumber+" hand: "+getPlayerHand() + " discarded");
                         this.fileWriter.flush();
                     } catch (IOException e) {
@@ -385,7 +412,7 @@ public class CardGame {
                         e.printStackTrace();
                     }
                     favouriteCard= false;
-                }else continue;
+                }
                 
                 
             }
@@ -436,8 +463,23 @@ public class CardGame {
             winningHand = checkHand(); 
             while (!Thread.currentThread().isInterrupted() && !winningHand) {
                 winningHand = checkHand();
+                
                 drawCard();
+                    // try {
+                    //     Thread.sleep(1);
+                    // } catch (InterruptedException e) {
+                    //     // TODO Auto-generated catch block
+                    //     System.out.println("Sleep error draw player" + playerNumber);
+                    //     e.printStackTrace();
+                    // }
                 discardCard();
+                // try {
+                //     Thread.sleep(1);
+                // } catch (InterruptedException e) {
+                //     // TODO Auto-generated catch block
+                //     System.out.println("Sleep error discard, player" + playerNumber);
+                //     e.printStackTrace();
+                // }
                 winningHand = checkHand();
             }
             //If the winning hand flag is true, the game goes into its end phase and starts its winner declaration
@@ -498,10 +540,10 @@ public class CardGame {
         
         // creates players and add them to the ArrayList. Creates player threads and adds them to the threadlist
         for (int i=0; i<this.playerCount; i++){ 
-            Player newPlayer = new Player(i+1, this);
             CardDeck newDeck = new CardDeck(i+1);
-            this.players.add(newPlayer);
             this.decks.add(newDeck);
+            Player newPlayer = new Player(i+1, this);
+            this.players.add(newPlayer);
             playersHands.put(i+1, newPlayer.getPlayerHand());
             playersCardHands.put(i+1, newPlayer.getPlayerCards());
             decksHands.put(i+1, newDeck.getDeckHand());

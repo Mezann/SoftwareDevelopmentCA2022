@@ -12,37 +12,5 @@
 13/11 - Omar AL GHAITHY - Driver - 1100 - Four Hours - 700041635 - 690070278
 14/11 - Omar AL GHAITHY - Driver - 1200 - Two Hours - 700041635 - 690070278
 14/11 - Mezan AHMED - Driver - 1400 - Four Hours - 690070278 - 700041635
-15/11
-
-1
-235
-567
-212
-1
-24574
-2456
-123
-1
-3486
-3142
-145
-1
-4375
-41365
-123
-521472
-5274
-5
-1
-6
-6
-6
-1
-7
-7
-7
-1
-8
-8
-8
-1
+15/11 - Omar AL GHAITHY - Driver - 1400 - Three Hours - 700041635 - 690070278
+15/11 - Mezan AHMED - Driver - 1200 - One Hour - 690070278 - 700041635
