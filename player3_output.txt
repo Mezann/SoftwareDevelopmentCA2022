@@ -1,61 +1,19 @@
 Player 3 initial hand 3 7 11 15
-Player 3 draws a 19 from deck 2
-Player 3 discards a 7 to deck 4
-Player 3 current hand is 3 11 15 19
-Player 3 draws a 23 from deck 2
-Player 3 discards a 19 to deck 4
-Player 3 current hand is 3 11 15 23
-Player 3 draws a 27 from deck 2
-Player 3 discards a 27 to deck 4
-Player 3 current hand is 3 11 15 23
-Player 3 draws a 1 from deck 2
+Player 3 draws a 19 from deck 3
 Player 3 discards a 11 to deck 4
-Player 3 current hand is 3 15 23 1
-Player 3 draws a 10 from deck 2
-Player 3 discards a 15 to deck 4
-Player 3 current hand is 3 23 1 10
-Player 3 draws a 22 from deck 2
-Player 3 discards a 10 to deck 4
-Player 3 current hand is 3 23 1 22
-Player 3 draws a 14 from deck 2
-Player 3 discards a 14 to deck 4
-Player 3 current hand is 3 23 1 22
-Player 3 draws a 1 from deck 2
+Player 3 current hand is 3 7 15 19
+Player 3 draws a 23 from deck 3
 Player 3 discards a 23 to deck 4
-Player 3 current hand is 3 1 22 1
-Player 3 draws a 18 from deck 2
-Player 3 discards a 1 to deck 4
-Player 3 current hand is 3 1 22 18
-Player 3 draws a 26 from deck 2
-Player 3 discards a 22 to deck 4
-Player 3 current hand is 3 1 18 26
-Player 3 draws a 25 from deck 2
-Player 3 discards a 26 to deck 4
-Player 3 current hand is 3 1 18 25
-Player 3 draws a 6 from deck 2
-Player 3 discards a 6 to deck 4
-Player 3 current hand is 3 1 18 25
-Player 3 draws a 29 from deck 2
-Player 3 discards a 29 to deck 4
-Player 3 current hand is 3 1 18 25
-Player 3 draws a 9 from deck 2
-Player 3 discards a 18 to deck 4
-Player 3 current hand is 3 1 25 9
-Player 3 draws a 13 from deck 2
-Player 3 discards a 13 to deck 4
-Player 3 current hand is 3 1 25 9
-Player 3 draws a 5 from deck 2
-Player 3 discards a 1 to deck 4
-Player 3 current hand is 3 25 9 5
-Player 3 draws a 17 from deck 2
-Player 3 discards a 17 to deck 4
-Player 3 current hand is 3 25 9 5
-Player 3 draws a 12 from deck 2
-Player 3 discards a 12 to deck 4
-Player 3 current hand is 3 25 9 5
-Player 3 draws a 16 from deck 2
-Player 3 discards a 25 to deck 4
-Player 3 current hand is 3 9 5 16
-Player 3 draws a 20 from deck 2
-Player 3 discards a 16 to deck 4
-Player 3 current hand is 3 9 5 20
+Player 3 current hand is 3 7 15 19
+Player 3 draws a 27 from deck 3
+Player 3 discards a 27 to deck 4
+Player 3 current hand is 3 7 15 19
+Player 3 draws a 31 from deck 3
+Player 3 discards a 7 to deck 4
+Player 3 current hand is 3 15 19 31
+Player 3 draws a 10 from deck 3
+Player 3 discards a 31 to deck 4
+Player 3 current hand is 3 15 19 10
+Player 1 has informed Player 3 that Player 1 has won 
+Player 3 exits
+Player 3 hand: 3 15 19 10

@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,7 +11,6 @@ public class CardDeck {
     private Integer deckNumber;
     public ArrayList<Integer> deck = new ArrayList<Integer>();
     public ArrayList<Card> cardDeck = new ArrayList<Card>();
-    public final ReentrantLock deckLock;
     private FileWriter fileWriter;
 
     /**
@@ -21,11 +19,9 @@ public class CardDeck {
      * */
     public CardDeck(Integer deckNumber){
         this.deckNumber = deckNumber;
-        deckLock = new ReentrantLock();
 
         String filename = "deck" + deckNumber.toString() + "_output.txt";
                 File file = new File(filename);
-
                 try {
                     //Checks if file exists
                     if (file.exists() && !file.isDirectory()) {
@@ -45,75 +41,51 @@ public class CardDeck {
      * @return deckNumber
      * */
     public Integer getDeckNumber() { return deckNumber; }
-    /**
-     * Obtains the list of cards that are in the deck
-     * @return deckNumber
-     * */
-    public ArrayList<Integer> getDeckHand() { return deck; }
+
 
     /**
-     * Obtains the list of cards that are in the deck
-     * @return cardDeck
+     * Obtains the list of cards that are in the deck as an integer array
+     * @return intDeckCards
      */
-    public ArrayList<Card> getDeckCards() { return cardDeck; }
+    public ArrayList<Integer> getDeckCards() { 
+        ArrayList<Integer> intDeckCards = new ArrayList<Integer>();
+        for (Card card : cardDeck) {
+            int cardValue = card.getCardValue();
+            intDeckCards.add(cardValue);
+        }
+        return intDeckCards; 
+    }
 
     /**
      * Adds a card to the deck
      * @param cardValue
      * */
-    public synchronized void addDeckHand(Integer cardValue) {
-        this.deck.add(cardValue);
+    public void addDeckHand(Integer cardValue) {
+        // //remove nl test
+        // this.deck.add(cardValue);
+        this.cardDeck.add(new Card(cardValue));
     }
 
-    /**
-     * Adds a card to the deck
-     * @param card
-     */
-    public synchronized void addDeckCard(Card card) {
-        this.cardDeck.add(card);
-    }
-
-    /**
-     * Sets the whole deck
-     * @param deck
-     */
-    public synchronized void setDeckHand(ArrayList<Integer> deck) {
-        this.deck = deck;
-    }
-
-    /**
-     * Sets the entire deck
-     * @param cardDeck
-     */
-    public synchronized void setDeckCards(ArrayList<Card> cardDeck) {
-        this.cardDeck = cardDeck;
-    }
     
     /**
      * Removes a card from the deck
      * @param 
      * */
-    public synchronized Integer removeCard() {
-        //Integer cardRemoved = this.cardDeck.get(0).getCardValue();
-        Integer intPicked = this.deck.get(0);
-        this.deck.remove(0);
-        //this.cardDeck.remove(0);
-        return intPicked;
+    public Card removeCard() {
+        Card cardRemoved = this.cardDeck.get(0);
+        // //remove nl test
+        // this.deck.remove(0);
+        this.cardDeck.remove(0);
+        return cardRemoved;
     }
 
     /**
      * Closes output file
      */
     public void closeFile() {
-        ArrayList<Card> cardDeck = this.getDeckCards();
-        ArrayList<Integer> intCardDeck = new ArrayList<Integer>();
-        for (Card card : cardDeck) {
-            Integer cardIntValue = card.getCardValue();
-            intCardDeck.add(cardIntValue);
-        }
         try{
             this.fileWriter.write("Deck" + deckNumber + " contents: " 
-                + this.getDeckHand().toString().replace("[", "").replace("]", "").replace(",", ""));
+                + getDeckCards().toString().replace("[", "").replace("]", "").replace(",", ""));
             // this.fileWriter.write("Deck" + deckNumber + " contents: " 
             //                     + intCardDeck.toString().replace("[", "").replace("]", "").replace(",", ""));
             this.fileWriter.flush();
