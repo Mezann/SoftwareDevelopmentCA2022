@@ -377,7 +377,6 @@ public class CardGame {
             winningHand = checkHand(); 
             while (!Thread.currentThread().isInterrupted() && !winningHand) {
                 winningHand = checkHand();
-
                 try {
                     try {
                         Thread.sleep(100);
@@ -403,8 +402,7 @@ public class CardGame {
                     System.out.println("Failed to execute discard action, player " + playerNumber);
                     e.printStackTrace();
                 }
-                
-                winningHand = checkHand();
+            
                 
             }
             //If the winning hand flag is true, the game goes into its end phase and starts its winner declaration
