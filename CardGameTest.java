@@ -27,15 +27,14 @@ public class CardGameTest {
         try {
             //Checks if file exists
             if (defaultPack.exists() && !defaultPack.isDirectory()) {
-                this.fileWriter = new FileWriter(defaultPack); 
+                FileWriter defaultWrite = new FileWriter(defaultPack); 
             } else {
-                file.createNewFile();
-                this.fileWriter = new FileWriter(defaultPack);
+                defaultPack.createNewFile();
+                FileWriter defauWriter = new FileWriter(defaultPack);
             }
-        } catch (IOException e) {
-            System.out.println("File creation error, player " + playerNumber);
-            e.printStackTrace();
-        }
+        } catch (IOException e) {}
+
+        
     }
 
     @Test
