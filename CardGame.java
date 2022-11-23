@@ -29,7 +29,15 @@ public class CardGame {
     private List<Integer> pack = new ArrayList<Integer>();
     private List<Thread> threadList = new ArrayList<Thread>();
     private volatile Player winner;
-    
+
+    void setPlayerCount(int n){
+        this.playerCount=n;
+    }
+
+    // public void setGame() throws IOException {
+        
+    // }
+
 
     /**
      * Starts all the player threads 
@@ -79,13 +87,8 @@ public class CardGame {
      * @return intList
      * @throws IOException
      * */
-    public List<Integer> packGenerator(Scanner sc) throws IOException {
-        //Obtains file, removes any whitespaces
-        System.out.println("Please enter the location of the pack to load: ");
-        String fileName = sc.next();
-        String replacedFile = fileName.replace("\n", "").replace(" ", "");
-        String trimmedFile = replacedFile.trim();
-
+    public List<Integer> packGenerator(String trimmedFile) throws IOException {
+        
         BufferedReader packLoc = new BufferedReader(new FileReader(trimmedFile));
         
         // read entire line as string
@@ -414,52 +417,40 @@ public class CardGame {
         }
     }
 
+    public class InvalidPackSizeException extends Exception { public InvalidPackSizeException() { super(); } }
+    public class NegativeCardException extends Exception { public NegativeCardException() { super(); } }
 
     /**
      * Constructor for the main class, CardGame. Starts the game; sets player, verifies pack file, deals cards, and starts threads
+     * @param playerCount
+     * @param filename
      * @throws IOException
+     * @throws CardGame.InvalidPackSizeException
+     * @throws CardGame.NegativeCardException
      */
-    public CardGame() throws IOException{
-        Scanner sc = new Scanner(System.in); 
-        System.out.println("Welcome to the CardGame! \n"
-                        + "You will need to enter how many players will play \n"
-                        + "You will then need to enter the location of the relevant pack");
+    public CardGame(Integer playerCount, String filename) throws IOException, CardGame.InvalidPackSizeException, CardGame.NegativeCardException {
 
-        
-        //Converts pack file into usable cards and verifies if the size is applicable otherwise looping until they are
-        Boolean verifyCardAmount = true;
-        while (verifyCardAmount) {
-            System.out.println("Please enter the number of players: "); 
-            this.playerCount = sc.nextInt();
+        this.playerCount = playerCount;
+        this.pack = new ArrayList<>(packGenerator(filename));
 
-            this.pack = new ArrayList<>(packGenerator(sc));
-
-            // //REMOVE TEST DELETE
-            // System.out.println("Pack: " + pack);
-            // System.out.println("Pack size: " + pack.size());
-
-            //Sets the negative flag to true if there is a card with a negative value in the pack
-            Boolean negativeFlag = false;;
-            for (int i = 0; i < pack.size(); i++) {
-                Integer cardValue = pack.get(i);
-                if (cardValue < 0) {
-                    negativeFlag = true;
-                    System.out.println("There can not be negative numbers in the pack.");
-                }
-            }
-            if (negativeFlag) {
-                continue;
-            }
-            
-            //Determines if the pack is the adequate size
-            if (pack.size() == playerCount*8) {
-                verifyCardAmount = false;
-            } else {
-                System.out.println("Please ensure there are a valid number of cards in the pack or change the player count. \n"
-                                + "There should be eight times as many cards as there are players. \n");
-            }
-            
+        //Verifies if pack is the correct size
+        if (pack.size() != playerCount*8) {
+            throw new InvalidPackSizeException();
         }
+        
+        //Verifies if the pack has any negative card values
+        for (int i = 0; i < pack.size(); i++) {
+            Integer cardValue = pack.get(i);
+            if (cardValue < 0) {
+                System.out.println("There can not be negative numbers in the pack.");
+                throw new NegativeCardException();
+            }
+        }
+        
+        
+        // //REMOVE TEST DELETE
+        // System.out.println("Pack: " + pack);
+        // System.out.println("Pack size: " + pack.size());
         
         // creates players and add them to the ArrayList. Creates player threads and adds them to the threadlist
         for (int i=0; i<this.playerCount; i++){ 
@@ -479,12 +470,50 @@ public class CardGame {
     }
 
     public static void main(String[] args) throws IOException {
-        CardGame game = new CardGame();
-        try {
-            game.runGame();
-        } catch (InterruptedException e) {
-            System.out.println("runGame error");
-            e.printStackTrace();
+
+        System.out.println("Welcome to the CardGame! \n"
+                        + "You will need to enter how many players will play \n"
+                        + "You will then need to enter the location of the relevant pack");
+
+        try (
+            //Converts pack file into usable cards and verifies if the size is applicable otherwise looping until they are
+            Scanner sc = new Scanner(System.in)) {
+            System.out.println("Please enter the number of players: ");
+            Integer playerCount = sc.nextInt();
+
+            //Obtains file, removes any whitespaces
+            System.out.println("Please enter the location of the pack to load: ");
+            String initialfileName = sc.next();
+            String replacedFile = initialfileName.replace("\n", "").replace(" ", "");
+            String filename = replacedFile.trim();
+
+            CardGame game;
+            while(true) {
+                try {
+                    game = new CardGame(playerCount, filename);
+                    game.runGame();
+                    break;
+                } catch (CardGame.InvalidPackSizeException e1) {
+                    System.out.println("Please ensure there are a valid number of cards in the pack or change the player count. \n"
+                                    + "There should be eight times as many cards as there are players. \n");
+
+                    System.out.println("Please enter the location of the pack to load: ");
+                    initialfileName = sc.next();
+                    replacedFile = initialfileName.replace("\n", "").replace(" ", "");
+                    filename = replacedFile.trim();
+                } catch(CardGame.NegativeCardException e2) {
+                    System.out.println("There can not be negative numbers in the pack.");
+
+                    System.out.println("Please enter the location of the pack to load: ");
+                    initialfileName = sc.next();
+                    replacedFile = initialfileName.replace("\n", "").replace(" ", "");
+                    filename = replacedFile.trim();
+                } catch (InterruptedException e3) {
+                    System.out.println("runGame error");
+                    e3.printStackTrace();
+                }
+            }
+
         }
     }
 
