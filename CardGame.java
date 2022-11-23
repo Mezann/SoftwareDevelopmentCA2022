@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,14 +31,31 @@ public class CardGame {
     private List<Thread> threadList = new ArrayList<Thread>();
     private volatile Player winner;
 
-    void setPlayerCount(int n){
-        this.playerCount=n;
+    /**
+     * Sets the player count
+     * @param playerCount
+     */
+    public void setPlayerCount(int playerCount){
+        this.playerCount = playerCount;
     }
 
-    // public void setGame() throws IOException {
-        
-    // }
+    /**
+     * Retrieves the player count 
+     * @return playerCount
+     */
+    public Integer getPlayerCount() { return playerCount; }
 
+    public List<Player> getPlayers() { return players; }
+    public List<CardDeck> getDecks() { return decks; }
+
+    // Getter
+    public ArrayList<Integer> getPlayerHand(int playerNumber){
+        return players.get(playerNumber).getPlayerCards();
+    }
+
+    public ArrayList<Integer> getDeckHand(int DeckNumber){
+        return decks.get(DeckNumber).getDeckCards();
+    }
 
     /**
      * Starts all the player threads 
@@ -88,6 +106,11 @@ public class CardGame {
      * @throws IOException
      * */
     public List<Integer> packGenerator(String trimmedFile) throws IOException {
+        
+        try {
+            try (FileReader fileReader = new FileReader(trimmedFile)) {
+            }
+        } catch (FileNotFoundException e) {}
         
         BufferedReader packLoc = new BufferedReader(new FileReader(trimmedFile));
         
@@ -290,14 +313,6 @@ public class CardGame {
             Card drawnCard = drawDeck.removeCard();
             this.addPlayerCardHand(drawnCard);
 
-            // //remove nl test
-            // this.addPlayerHand(drawnCard.getCardValue());
-
-            // //REMOVE TEST DELETE
-            // System.out.println("player " + playerNumber +" draws a " + drawnCard.getCardValue() +" from deck " + (playerNumber) + "\n"
-            //                 + "Player " + playerNumber + " current hand is " + getPlayerHand().toString().replace("[", "").replace("]", "").replace(",", "") + "\n"
-            //                 + "deck " + (playerNumber) + ": " + drawDeck.getDeckHand() + "drawn");
-
             try {
                 int finalCard = (cardHand.size()-1);
                 this.fileWriter.write("Player " + playerNumber + " draws a " + cardHand.get(finalCard).getCardValue() + " from deck " + (playerNumber) + "\n");
@@ -385,12 +400,10 @@ public class CardGame {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         System.out.println("Sleep error draw player" + playerNumber);
-                        e.printStackTrace();
                     }
                     drawCard();
                 } catch (Exception e) {
                     System.out.println("Failed to execute draw action, player " + playerNumber);
-                    e.printStackTrace();
                 }
 
                 try {
@@ -398,12 +411,10 @@ public class CardGame {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         System.out.println("Sleep error discard, player " + playerNumber);
-                        e.printStackTrace();
                     }
                     discardCard();
                 } catch (Exception e) {
                     System.out.println("Failed to execute discard action, player " + playerNumber);
-                    e.printStackTrace();
                 }
             
                 
@@ -417,7 +428,14 @@ public class CardGame {
         }
     }
 
+    /**
+     * Unique exception for showing invalid number of cards in pack
+     */
     public class InvalidPackSizeException extends Exception { public InvalidPackSizeException() { super(); } }
+    
+    /**
+     * Unique exception for showing invalid card value in pack file
+     */
     public class NegativeCardException extends Exception { public NegativeCardException() { super(); } }
 
     /**
@@ -431,7 +449,14 @@ public class CardGame {
     public CardGame(Integer playerCount, String filename) throws IOException, CardGame.InvalidPackSizeException, CardGame.NegativeCardException {
 
         this.playerCount = playerCount;
-        this.pack = new ArrayList<>(packGenerator(filename));
+
+        //Verifies if the file given exists
+        try {
+            this.pack = new ArrayList<>(packGenerator(filename));
+        } catch (FileNotFoundException e) {
+            throw e;
+        }
+        
 
         //Verifies if pack is the correct size
         if (pack.size() != playerCount*8) {
@@ -452,7 +477,55 @@ public class CardGame {
         // System.out.println("Pack: " + pack);
         // System.out.println("Pack size: " + pack.size());
         
-        // creates players and add them to the ArrayList. Creates player threads and adds them to the threadlist
+        //Creates players and add them to the ArrayList. Creates player threads and adds them to the threadlist
+        for (int i=0; i<this.playerCount; i++){ 
+            CardDeck newDeck = new CardDeck(i+1);
+            this.decks.add(newDeck);
+            Player newPlayer = new Player(i+1, this);
+            this.players.add(newPlayer);
+            this.threadList.add(new Thread(newPlayer));
+        }
+        //Sets the decks which the players will discard to
+        for (int i=0; i<this.playerCount; i++) {
+            players.get(i).setDiscardDeck(playerCount);
+        }
+        //Deals the cards 
+        this.deal(playerCount);
+        
+    }
+
+    public CardGame(Integer playerCount) throws IOException, CardGame.InvalidPackSizeException, CardGame.NegativeCardException {
+
+        this.playerCount = playerCount;
+
+        //Verifies if the file given exists
+        try {
+            this.pack = new ArrayList<>(packGenerator("textPack.txt"));
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException();
+        }
+        
+
+        //Verifies if pack is the correct size
+        if (pack.size() != playerCount*8) {
+            throw new InvalidPackSizeException();
+        }
+        
+        //Verifies if the pack has any negative card values
+        for (int i = 0; i < pack.size(); i++) {
+            Integer cardValue = pack.get(i);
+            if (cardValue < 0) {
+                System.out.println("There can not be negative numbers in the pack.");
+                throw new NegativeCardException();
+            }
+        }
+        
+        
+        // //REMOVE TEST DELETE
+        // System.out.println("Pack: " + pack);
+        // System.out.println("Pack size: " + pack.size());
+        
+        //Creates players and add them to the ArrayList. Creates player threads and adds them to the threadlist
         for (int i=0; i<this.playerCount; i++){ 
             CardDeck newDeck = new CardDeck(i+1);
             this.decks.add(newDeck);
@@ -476,7 +549,8 @@ public class CardGame {
                         + "You will then need to enter the location of the relevant pack");
 
         try (
-            //Converts pack file into usable cards and verifies if the size is applicable otherwise looping until they are
+            //Scanner used to take in user inputs, to sent to the cardgame constructor
+            
             Scanner sc = new Scanner(System.in)) {
             System.out.println("Please enter the number of players: ");
             Integer playerCount = sc.nextInt();
@@ -494,7 +568,7 @@ public class CardGame {
                     game.runGame();
                     break;
                 } catch (CardGame.InvalidPackSizeException e1) {
-                    System.out.println("Please ensure there are a valid number of cards in the pack or change the player count. \n"
+                    System.out.println("Please ensure there are a valid number of cards in the pack. \n"
                                     + "There should be eight times as many cards as there are players. \n");
 
                     System.out.println("Please enter the location of the pack to load: ");
@@ -511,12 +585,15 @@ public class CardGame {
                 } catch (InterruptedException e3) {
                     System.out.println("runGame error");
                     e3.printStackTrace();
+                } catch (FileNotFoundException e4) {
+                    System.out.println("File not found, please enter a valid file address");
+
+                    System.out.println("Please enter the location of the pack to load: ");
+                    initialfileName = sc.next();
+                    replacedFile = initialfileName.replace("\n", "").replace(" ", "");
+                    filename = replacedFile.trim();
                 }
             }
-
         }
     }
-
-    
 }
-

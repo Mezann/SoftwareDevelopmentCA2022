@@ -42,6 +42,17 @@ public class CardDeck {
      * */
     public Integer getDeckNumber() { return deckNumber; }
 
+    /**
+     * Sets the entire deck of cards using an integer array
+     * @return
+     */
+    public void setDeckCards(ArrayList<Integer> deckHand) {
+        ArrayList<Card> cardTransfer = new ArrayList<Card>();
+            for (Integer card: deckHand) {
+                cardTransfer.add(new Card(card));
+            }
+            this.cardDeck = cardTransfer;
+    }
 
     /**
      * Obtains the list of cards that are in the deck as an integer array
