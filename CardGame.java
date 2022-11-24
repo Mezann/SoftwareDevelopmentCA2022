@@ -31,28 +31,23 @@ public class CardGame {
     private List<Thread> threadList = new ArrayList<Thread>();
     private volatile Player winner;
 
-    /**
-     * Sets the player count
-     * @param playerCount
-     */
-    public void setPlayerCount(int playerCount){
-        this.playerCount = playerCount;
-    }
-
-    /**
-     * Retrieves the player count 
-     * @return playerCount
-     */
-    public Integer getPlayerCount() { return playerCount; }
-
     public List<Player> getPlayers() { return players; }
     public List<CardDeck> getDecks() { return decks; }
 
-    // Getter
-    public ArrayList<Integer> getPlayerHand(int playerNumber){
+    /**
+     * Obtains the hand of the relevant player, returning it as an integer arraylist
+     * @param playerNumber
+     * @return playerCards
+     */
+    public ArrayList<Integer> getPlayerHand(int playerNumber) {
         return players.get(playerNumber).getPlayerCards();
     }
 
+    /**
+     * Obtains the hand of the relevant player, returning it as an integer arraylist
+     * @param DeckNumber
+     * @return deckCards
+     */
     public ArrayList<Integer> getDeckHand(int DeckNumber){
         return decks.get(DeckNumber).getDeckCards();
     }
@@ -81,15 +76,15 @@ public class CardGame {
      * Writes the end messages to each player output file as well as closing every file before ending the program
      * */
     public void endGame() {
-        //Writes end message in player files, 
+        //Writes end message in player files and deck files
         for (Player player : this.players) {
             player.closeFile();
         }
-
         for (CardDeck cardDeck : this.decks) {
             cardDeck.closeFile();
         }
 
+        //Prints winner message to terminal
         System.out.println("Player " + winner.getPlayerNumber() + " wins" + "\n"
                         + "All files are closed." + "\n"
                         + "Thank you for playing." + "\n"
@@ -107,10 +102,12 @@ public class CardGame {
      * */
     public List<Integer> packGenerator(String trimmedFile) throws IOException {
         
+        //Determines if file given exists, otherwise throwing an exception
         try {
             try (FileReader fileReader = new FileReader(trimmedFile)) {
             }
-        } catch (FileNotFoundException e) {}
+        } catch (FileNotFoundException e) {
+        }
         
         BufferedReader packLoc = new BufferedReader(new FileReader(trimmedFile));
         
@@ -149,16 +146,12 @@ public class CardGame {
                 Card dealtCard = new Card(pickedCard);
                 int playerNumber = j % playerCount + 1;
                 if (playerNumber == i + 1) {
-                    // //Remove nl
-                    // players.get(playerNumber-1).addPlayerHand(pickedCard);
                     players.get(playerNumber-1).addPlayerCardHand(dealtCard);
                 }
             }
+
+            //Writes initial hand to output files
             Player specifiedPlayer = players.get(i%playerCount);
-
-            //REMOVE TEST DELETE
-            System.out.println("Player " + (i%playerCount + 1) + " hand: " + specifiedPlayer.getPlayerCards());
-
             try {
                 specifiedPlayer.getFileWriter().write("Player " + (i%playerCount + 1) + " initial hand "
                      + specifiedPlayer.getPlayerCards().toString().replace("[", "").replace("]", "").replace(",", "") + "\n");
@@ -177,9 +170,6 @@ public class CardGame {
                     decks.get(deckNumber-1).addDeckHand(pickedCard);
                 }
             }
-            //REMOVE TEST DELETE
-            CardDeck specificDeck = decks.get(i%playerCount);
-            System.out.println("Deck " + (i%playerCount + 1) + " hand: " + specificDeck.getDeckCards());
         }
 
     }
@@ -193,8 +183,6 @@ public class CardGame {
         private Boolean matchHand = false;
         private Integer playerNumber;
         private ArrayList<Card> cardHand = new ArrayList<Card>();
-        // //remove nl test
-        // private ArrayList<Integer> hand = new ArrayList<Integer>();
         private Random random = new Random();
         private CardDeck drawDeck;
         private CardDeck discardDeck;
@@ -318,8 +306,6 @@ public class CardGame {
                 this.fileWriter.write("Player " + playerNumber + " draws a " + cardHand.get(finalCard).getCardValue() + " from deck " + (playerNumber) + "\n");
                 this.fileWriter.flush();
             } catch (IOException e) {
-                System.out.println("Draw card filewriter error, player " + playerNumber);
-                e.printStackTrace();
             }
         }
 
@@ -336,21 +322,11 @@ public class CardGame {
                     cardHand.remove(rand);
                     discardDeck.addDeckHand(theCard);
 
-                    // //remove nl test
-                    // hand.remove(rand);
-                    
-                    // //REMOVE TEST DELETE
-                    // System.out.println("Player " + playerNumber + " discards a " + theCard + " to deck " + (playerNumber%playerCount+1) + "\n"
-                    // + "deck " + (playerNumber%playerCount+1) + ": " + discardDeck.getDeckHand() + " discarded" + "\n"
-                    // + "player "+playerNumber+" hand: "+getPlayerCards() + " discarded");
-
                     try {    
                         this.fileWriter.write("Player " + playerNumber + " discards a " + theCard + " to deck " + (playerNumber%playerCount+1) + "\n"
                             + "Player " + playerNumber + " current hand is " + getPlayerCards().toString().replace("[", "").replace("]", "").replace(",", "") + "\n");
                         this.fileWriter.flush();
                     } catch (IOException e) {
-                        System.out.println("Discard filewritter card error");
-                        e.printStackTrace();
                     }
                     favouriteCard= false;
                 }
@@ -373,8 +349,8 @@ public class CardGame {
                 } else {
                     this.fileWriter.write("Player " + winner.getPlayerNumber() + " has informed " + "Player " + playerNumber
                     + " that Player " + winner.getPlayerNumber() + " has won \n"
-                    + "Player " + getPlayerNumber() + " exits" + "\n"
-                    + "Player " + getPlayerNumber() + " hand: " + getPlayerCards().toString().replace("[", "").replace("]", "").replace(",", ""));
+                    + "Player " + playerNumber + " exits" + "\n"
+                    + "Player " + playerNumber + " hand: " + getPlayerCards().toString().replace("[", "").replace("]", "").replace(",", ""));
                     this.fileWriter.flush();
                 }
                 this.fileWriter.close();
@@ -391,30 +367,25 @@ public class CardGame {
         @Override
         public void run() {
             //Creates winner flag, then starts the game until a winner is found and a thread is not interrupted
-            Boolean winningHand = false;
-            winningHand = checkHand(); 
+            Boolean winningHand = checkHand();
             while (!Thread.currentThread().isInterrupted() && !winningHand) {
                 winningHand = checkHand();
                 try {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        System.out.println("Sleep error draw player" + playerNumber);
                     }
                     drawCard();
                 } catch (Exception e) {
-                    System.out.println("Failed to execute draw action, player " + playerNumber);
                 }
 
                 try {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        System.out.println("Sleep error discard, player " + playerNumber);
                     }
                     discardCard();
                 } catch (Exception e) {
-                    System.out.println("Failed to execute discard action, player " + playerNumber);
                 }
             
                 
@@ -456,7 +427,6 @@ public class CardGame {
         } catch (FileNotFoundException e) {
             throw e;
         }
-        
 
         //Verifies if pack is the correct size
         if (pack.size() != playerCount*8) {
@@ -471,60 +441,7 @@ public class CardGame {
                 throw new NegativeCardException();
             }
         }
-        
-        
-        // //REMOVE TEST DELETE
-        // System.out.println("Pack: " + pack);
-        // System.out.println("Pack size: " + pack.size());
-        
-        //Creates players and add them to the ArrayList. Creates player threads and adds them to the threadlist
-        for (int i=0; i<this.playerCount; i++){ 
-            CardDeck newDeck = new CardDeck(i+1);
-            this.decks.add(newDeck);
-            Player newPlayer = new Player(i+1, this);
-            this.players.add(newPlayer);
-            this.threadList.add(new Thread(newPlayer));
-        }
-        //Sets the decks which the players will discard to
-        for (int i=0; i<this.playerCount; i++) {
-            players.get(i).setDiscardDeck(playerCount);
-        }
-        //Deals the cards 
-        this.deal(playerCount);
-        
-    }
 
-    public CardGame(Integer playerCount) throws IOException, CardGame.InvalidPackSizeException, CardGame.NegativeCardException {
-
-        this.playerCount = playerCount;
-
-        //Verifies if the file given exists
-        try {
-            this.pack = new ArrayList<>(packGenerator("textPack.txt"));
-        } catch (FileNotFoundException e) {
-            throw new FileNotFoundException();
-        }
-        
-
-        //Verifies if pack is the correct size
-        if (pack.size() != playerCount*8) {
-            throw new InvalidPackSizeException();
-        }
-        
-        //Verifies if the pack has any negative card values
-        for (int i = 0; i < pack.size(); i++) {
-            Integer cardValue = pack.get(i);
-            if (cardValue < 0) {
-                System.out.println("There can not be negative numbers in the pack.");
-                throw new NegativeCardException();
-            }
-        }
-        
-        
-        // //REMOVE TEST DELETE
-        // System.out.println("Pack: " + pack);
-        // System.out.println("Pack size: " + pack.size());
-        
         //Creates players and add them to the ArrayList. Creates player threads and adds them to the threadlist
         for (int i=0; i<this.playerCount; i++){ 
             CardDeck newDeck = new CardDeck(i+1);

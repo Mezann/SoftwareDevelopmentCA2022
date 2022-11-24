@@ -37,24 +37,6 @@ public class CardDeck {
     }
 
     /**
-     * Obtains the number of the deck to identify it
-     * @return deckNumber
-     * */
-    public Integer getDeckNumber() { return deckNumber; }
-
-    /**
-     * Sets the entire deck of cards using an integer array
-     * @return
-     */
-    public void setDeckCards(ArrayList<Integer> deckHand) {
-        ArrayList<Card> cardTransfer = new ArrayList<Card>();
-            for (Integer card: deckHand) {
-                cardTransfer.add(new Card(card));
-            }
-            this.cardDeck = cardTransfer;
-    }
-
-    /**
      * Obtains the list of cards that are in the deck as an integer array
      * @return intDeckCards
      */
@@ -72,8 +54,6 @@ public class CardDeck {
      * @param cardValue
      * */
     public void addDeckHand(Integer cardValue) {
-        // //remove nl test
-        // this.deck.add(cardValue);
         this.cardDeck.add(new Card(cardValue));
     }
 
@@ -84,8 +64,6 @@ public class CardDeck {
      * */
     public Card removeCard() {
         Card cardRemoved = this.cardDeck.get(0);
-        // //remove nl test
-        // this.deck.remove(0);
         this.cardDeck.remove(0);
         return cardRemoved;
     }
@@ -97,8 +75,6 @@ public class CardDeck {
         try{
             this.fileWriter.write("Deck" + deckNumber + " contents: " 
                 + getDeckCards().toString().replace("[", "").replace("]", "").replace(",", ""));
-            // this.fileWriter.write("Deck" + deckNumber + " contents: " 
-            //                     + intCardDeck.toString().replace("[", "").replace("]", "").replace(",", ""));
             this.fileWriter.flush();
             this.fileWriter.close();
         }catch (IOException e){
